@@ -115,7 +115,7 @@ done
 
 
 # get some IP addresses from Router
-LAN_IP6=$(ip addr | grep '::1' | grep noprefixroute | grep -v 'deprecated' | grep -v 'inet6 fd' | awk '{print $2}' | cut -f 1 -d '/')
+LAN_IP6=$(ip addr | grep '::1' | grep noprefixroute | grep -v 'deprecated' | awk '{print $2}' | cut -f 1 -d '/')
  
 WAN_IP4=$(ip addr show dev "$WAN" | grep "inet " | awk '{print $2}' | cut  -f 1 -d '/')
 
@@ -162,8 +162,8 @@ mv $tayga_conf $tayga_conf.old
 touch $tayga_conf
 echo "tun-device nat64" >> $tayga_conf
 echo "ipv4-addr 192.168.2.1 " >> $tayga_conf	 
+echo "ipv6-addr fdaa:bb:1::1" >> $tayga_conf
 echo "prefix  $NAT64_PREFIX  " >> $tayga_conf	 
-echo "ipv6-addr $LAN_IP6" >> $tayga_conf
 echo "dynamic-pool 192.168.2.0/24" >> $tayga_conf
 echo "data-dir /tmp/db/tayga" >> $tayga_conf
 
@@ -176,12 +176,12 @@ ip addr flush nat64
 ip link set nat64 up
 
 # clear nat64 dynamic map
-rm /tmp/db/tayga/dynamic.map
+rm -f /tmp/db/tayga/dynamic.map
 
-ip addr add "$WAN_IP4" dev nat64	   		
-ip addr add "$WAN_IP6" dev nat64
-#ip addr add "192.168.2.1" dev nat64	   		
-#ip addr add $LAN_IP6 dev nat64
+#ip addr add "$WAN_IP4" dev nat64
+#ip addr add "$WAN_IP6" dev nat64
+ip addr add "192.168.2.1" dev nat64
+ip addr add $LAN_IP6 dev nat64
 ip route add 192.168.2.0/24 dev nat64
 ip route add $NAT64_PREFIX dev nat64
 
